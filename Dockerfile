@@ -5,6 +5,7 @@ FROM alpine:3.19.1
 # https://www.openssl.org/docs/man3.0/man1/openssl-req.html
 # https://www.feistyduck.com/library/openssl-cookbook/online/openssl-command-line/signing-your-own-certificates.html
 # https://www.feistyduck.com/library/openssl-cookbook/online/openssl-command-line/creating-certificates-valid-for-multiple-hostnames.html
+# https://superuser.com/questions/1451895/err-ssl-key-usage-incompatible-solution
 
 
 RUN apk update && apk add openssl && apk add envsubst
@@ -19,13 +20,9 @@ COPY --chmod=644 <<"END_CERTIFICATE_CONFIG" /usr/local/bin/certificate_config.te
   CN = ${HOSTNAME}
 
   [v3_req]
-  keyUsage = keyEncipherment, dataEncipherment
+  keyUsage = digitalSignature, keyEncipherment
   extendedKeyUsage = serverAuth
-  subjectAltName = @alt_names
-
-  [alt_names]
-  DNS.1 =  ${HOSTNAME}
-  DNS.2 =*.${HOSTNAME}
+  subjectAltName = DNS:*.${HOSTNAME}, DNS:${HOSTNAME}
 END_CERTIFICATE_CONFIG
 
 COPY --chmod=700 <<"END_CREATE_CERTIFICATE" /usr/local/bin/create_certificate.sh
