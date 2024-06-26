@@ -13,13 +13,13 @@ RUN apk update && apk add openssl && apk add envsubst
 COPY --chmod=644 <<"END_CERTIFICATE_CONFIG" /usr/local/bin/certificate_config.template.conf
   [req]
   distinguished_name = req_distinguished_name
-  x509_extensions = v3_req
+  x509_extensions = req_extensions
   prompt = no
 
   [req_distinguished_name]
   CN = ${HOSTNAME}
 
-  [v3_req]
+  [req_extensions]
   keyUsage = digitalSignature, keyEncipherment
   extendedKeyUsage = serverAuth
   subjectAltName = DNS:*.${HOSTNAME}, DNS:${HOSTNAME}
@@ -41,9 +41,6 @@ COPY --chmod=700 <<"END_CREATE_CERTIFICATE" /usr/local/bin/create_certificate.sh
     -nodes \
     -sha256 \
     -config /usr/local/bin/certificate_config.conf \
-    -extensions 'v3_req' \
-
-    #-subj '/CN=*.'${HOSTNAME}'/CN='${HOSTNAME}'' \
 
   chmod 644 /usr/local/share/${FILENAME:-localhost.pem}
 END_CREATE_CERTIFICATE
